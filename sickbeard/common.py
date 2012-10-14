@@ -17,12 +17,13 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import os.path
-import operator, platform
+import operator
+import platform
 import re
 
 from sickbeard import version
 
-USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION.replace(' ','-')+' ('+platform.system()+' '+platform.release()+')'
+USER_AGENT = 'Sick Beard/alpha2-' + version.SICKBEARD_VERSION.replace(' ', '-') + ' (' + platform.system() + ' ' + platform.release() + ')'
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
@@ -101,7 +102,7 @@ class Quality:
     def _getStatusStrings(status):
         toReturn = {}
         for x in Quality.qualityStrings.keys():
-            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status]+" ("+Quality.qualityStrings[x]+")"
+            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status] + " (" + Quality.qualityStrings[x] + ")"
         return toReturn
 
     @staticmethod
@@ -112,7 +113,7 @@ class Quality:
             anyQuality = reduce(operator.or_, anyQualities)
         if bestQualities:
             bestQuality = reduce(operator.or_, bestQualities)
-        return anyQuality | (bestQuality<<16)
+        return anyQuality | (bestQuality << 16)
 
     @staticmethod
     def splitQuality(quality):
@@ -121,14 +122,13 @@ class Quality:
         for curQual in Quality.qualityStrings.keys():
             if curQual & quality:
                 anyQualities.append(curQual)
-            if curQual<<16 & quality:
+            if curQual << 16 & quality:
                 bestQualities.append(curQual)
 
         return (anyQualities, bestQualities)
 
     @staticmethod
     def nameQuality(name):
-
         name = os.path.basename(name)
 
         # if we have our exact text then assume we put it there
@@ -136,7 +136,7 @@ class Quality:
             if x == Quality.UNKNOWN:
                 continue
 
-            regex = '\W'+Quality.qualityStrings[x].replace(' ','\W')+'\W'
+            regex = '\W' + Quality.qualityStrings[x].replace(' ', '\W') + '\W'
             regex_match = re.search(regex, name, re.I)
             if regex_match:
                 return x
@@ -187,8 +187,8 @@ class Quality:
     def splitCompositeStatus(status):
         """Returns a tuple containing (status, quality)"""
         for x in sorted(Quality.qualityStrings.keys(), reverse=True):
-            if status > x*100:
-                return (status-x*100, x)
+            if status > x * 100:
+                return (status - x * 100, x)
 
         return (Quality.NONE, status)
 
@@ -237,7 +237,7 @@ class StatusStrings:
             if quality == Quality.NONE:
                 return self.statusStrings[status]
             else:
-                return self.statusStrings[status]+" ("+Quality.qualityStrings[quality]+")"
+                return self.statusStrings[status] + " (" + Quality.qualityStrings[quality] + ")"
         else:
             return self.statusStrings[name]
 
