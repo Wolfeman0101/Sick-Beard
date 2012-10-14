@@ -66,26 +66,32 @@ multiEpStrings[NAMING_DUPLICATE] = "Duplicate"
 multiEpStrings[NAMING_EXTEND] = "Extend"
 multiEpStrings[NAMING_LIMITED_EXTEND] = "Extend (Limited)"
 
-class Quality:
 
-    NONE = 0
-    SDTV = 1
-    SDDVD = 1<<1 # 2
-    HDTV = 1<<2 # 4
-    HDWEBDL = 1<<3 # 8
-    HDBLURAY = 1<<4 # 16
-    FULLHDBLURAY = 1<<5 # 32
+class Quality:
+    NONE = 0              # 0
+    SDTV = 1              # 1
+    SDDVD = 1 << 1        # 2
+    HDTV = 1 << 2         # 4
+    RAWHDTV = 1 << 3      # 8  -- 720p/1080i mpeg2 (trollhd releases)
+    FULLHDTV = 1 << 4     # 16 -- 1080p HDTV (QCF releases)
+    HDWEBDL = 1 << 5      # 32
+    HDBLURAY = 1 << 6     # 64
+    FULLHDWEBDL = 1 << 7  # 128 -- 1080p web-dl
+    FULLHDBLURAY = 1 << 8 # 256
 
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
-    UNKNOWN = 1<<15
+    UNKNOWN = 1 << 15     # 32768
 
     qualityStrings = {NONE: "N/A",
                       UNKNOWN: "Unknown",
                       SDTV: "SD TV",
                       SDDVD: "SD DVD",
                       HDTV: "HD TV",
+                      RAWHDTV: "RawHD TV",
+                      FULLHDTV: "1080p HD TV",
                       HDWEBDL: "720p WEB-DL",
                       HDBLURAY: "720p BluRay",
+                      FULLHDWEBDL: "1080p WEB-DL",
                       FULLHDBLURAY: "1080p BluRay"}
 
     statusPrefixes = {DOWNLOADED: "Downloaded",
@@ -143,8 +149,14 @@ class Quality:
             return Quality.SDDVD
         elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any):
             return Quality.HDTV
+        elif checkName(["720p", "hdtv", "mpeg2"], all) or checkName(["1080i", "hdtv", "mpeg2"], all):
+            return Quality.RAWHDTV
+        elif checkName(["1080p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any):
+            return Quality.FULLHDTV
         elif checkName(["720p", "web.dl"], all) or checkName(["720p", "itunes", "h.?264"], all):
             return Quality.HDWEBDL
+        elif checkName(["1080p", "web.dl"], all) or checkName(["1080p", "itunes", "h.?264"], all):
+            return Quality.FULLHDWEBDL
         elif checkName(["720p", "bluray", "x264"], all) or checkName(["720p", "hddvd", "x264"], all):
             return Quality.HDBLURAY
         elif checkName(["1080p", "bluray", "x264"], all) or checkName(["1080p", "hddvd", "x264"], all):
@@ -154,11 +166,12 @@ class Quality:
 
     @staticmethod
     def assumeQuality(name):
-
         if name.lower().endswith(".avi"):
             return Quality.SDTV
         elif name.lower().endswith(".mkv"):
             return Quality.HDTV
+        elif name.lower().endswith(".ts"):
+            return Quality.RAWHDTV
         else:
             return Quality.UNKNOWN
 
@@ -195,21 +208,23 @@ Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualit
 Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in Quality.qualityStrings.keys()]
 
 HD = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
+HDp = Quality.combineQualities([Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.HDBLURAY, Quality.FULLHDWEBDL, Quality.FULLHDBLURAY], [])
 SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
-ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY, Quality.UNKNOWN], [])
-BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV, Quality.HDWEBDL], [Quality.HDTV])
+ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.HDBLURAY, Quality.FULLHDWEBDL, Quality.FULLHDBLURAY, Quality.UNKNOWN], [])
 
-qualityPresets = (SD, HD, ANY)
+qualityPresets = (SD, HD, HDp, ANY)
 qualityPresetStrings = {SD: "SD",
                         HD: "HD",
+                        HDp: "HD+",
                         ANY: "Any"}
+
 
 class StatusStrings:
     def __init__(self):
         self.statusStrings = {UNKNOWN: "Unknown",
                               UNAIRED: "Unaired",
                               SNATCHED: "Snatched",
-                              DOWNLOADED:  "Downloaded",
+                              DOWNLOADED: "Downloaded",
                               SKIPPED: "Skipped",
                               SNATCHED_PROPER: "Snatched (Proper)",
                               WANTED: "Wanted",
@@ -230,6 +245,7 @@ class StatusStrings:
         return name in self.statusStrings or name in Quality.DOWNLOADED or name in Quality.SNATCHED or name in Quality.SNATCHED_PROPER
 
 statusStrings = StatusStrings()
+
 
 class Overview:
     UNAIRED = UNAIRED # 1
@@ -253,4 +269,3 @@ countryList = {'Australia': 'AU',
                'Canada': 'CA',
                'USA': 'US'
                }
-
