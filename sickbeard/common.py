@@ -212,6 +212,9 @@ HDp = Quality.combineQualities([Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL,
 SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
 ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.HDBLURAY, Quality.FULLHDWEBDL, Quality.FULLHDBLURAY, Quality.UNKNOWN], [])
 
+# legacy template, cant remove due to reference in mainDB upgrade?
+BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV, Quality.HDWEBDL], [Quality.HDTV])
+
 qualityPresets = (SD, HD, HDp, ANY)
 qualityPresetStrings = {SD: "SD",
                         HD: "HD",
