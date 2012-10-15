@@ -39,7 +39,7 @@
         return false;
     },
     format: function(s) { 
-        return s.replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4);
+        return s.replace('hd+',4).replace('hd',3).replace('sd',2).replace('any',1).replace('best',0).replace('custom',5);
     },
     type: 'numeric'
 });
@@ -151,7 +151,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td>$curShow.network</td>
 #if $curShow.quality in $qualityPresets:
-    <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
+    <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality].replace("+","p")">$qualityPresetStrings[$curShow.quality]</span></td>
 #else:
     <td align="center"><span class="quality Custom">Custom</span></td>
 #end if

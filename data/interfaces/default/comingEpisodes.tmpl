@@ -43,7 +43,7 @@
         return false;
     },
     format: function(s) {
-        return s.replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4); 
+        return s.replace('hd+',4).replace('hd',3).replace('sd',2).replace('any',1).replace('best',0).replace('custom',5);
     },
     type: 'numeric'
 });
@@ -127,7 +127,7 @@
         <td align="center">$cur_result["network"]</td>
         <td align="center">
 #if int($cur_result["quality"]) in $qualityPresets:
-    <span class="quality $qualityPresetStrings[int($cur_result["quality"])]">$qualityPresetStrings[int($cur_result["quality"])]</span>
+    <span class="quality $qualityPresetStrings[int($cur_result["quality"])].replace("+","p")">$qualityPresetStrings[int($cur_result["quality"])]</span>
 #else:
     <span class="quality Custom">Custom</span>
 #end if
