@@ -76,8 +76,8 @@ class Quality:
     RAWHDTV = 1 << 3      # 8  -- 720p/1080i mpeg2 (trollhd releases)
     FULLHDTV = 1 << 4     # 16 -- 1080p HDTV (QCF releases)
     HDWEBDL = 1 << 5      # 32
-    HDBLURAY = 1 << 6     # 64
-    FULLHDWEBDL = 1 << 7  # 128 -- 1080p web-dl
+    FULLHDWEBDL = 1 << 6  # 64 -- 1080p web-dl
+    HDBLURAY = 1 << 7     # 128
     FULLHDBLURAY = 1 << 8 # 256
 
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
@@ -91,8 +91,8 @@ class Quality:
                       RAWHDTV: "RawHD TV",
                       FULLHDTV: "1080p HD TV",
                       HDWEBDL: "720p WEB-DL",
-                      HDBLURAY: "720p BluRay",
                       FULLHDWEBDL: "1080p WEB-DL",
+                      HDBLURAY: "720p BluRay",
                       FULLHDBLURAY: "1080p BluRay"}
 
     statusPrefixes = {DOWNLOADED: "Downloaded",
@@ -208,9 +208,9 @@ Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualit
 Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in Quality.qualityStrings.keys()]
 
 HD = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
-HDp = Quality.combineQualities([Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.HDBLURAY, Quality.FULLHDWEBDL, Quality.FULLHDBLURAY], [])
+HDp = Quality.combineQualities([Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY], [])
 SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
-ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.HDBLURAY, Quality.FULLHDWEBDL, Quality.FULLHDBLURAY, Quality.UNKNOWN], [])
+ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY, Quality.UNKNOWN], [])
 
 # legacy template, cant remove due to reference in mainDB upgrade?
 BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV, Quality.HDWEBDL], [Quality.HDTV])
