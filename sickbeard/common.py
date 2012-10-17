@@ -166,7 +166,7 @@ class Quality:
 
     @staticmethod
     def assumeQuality(name):
-        if name.lower().endswith(".avi"):
+        if name.lower().endswith((".avi", ".mp4")):
             return Quality.SDTV
         elif name.lower().endswith(".mkv"):
             return Quality.HDTV
@@ -207,9 +207,9 @@ Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qu
 Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualityStrings.keys()]
 Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in Quality.qualityStrings.keys()]
 
+SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
 HD = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
 HDp = Quality.combineQualities([Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY], [])
-SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
 ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY, Quality.UNKNOWN], [])
 
 # legacy template, cant remove due to reference in mainDB upgrade?
