@@ -539,3 +539,67 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
         self.connection.action("DROP TABLE tmp_tv_shows")
 
         self.incDBVersion()
+
+
+class Add1080pAndRawHDQualities(RenameSeasonFolders):
+    """
+    New Quality mapping, quick overview of what the upgrade needs to do:
+
+           quality   | old  | new
+        --------------------------
+        hdwebdl      | 1<<3 | 1<<5
+        hdbluray     | 1<<4 | 1<<7
+        fullhdbluray | 1<<5 | 1<<8
+        --------------------------
+        rawhdtv      |      | 1<<3
+        fullhdtv     |      | 1<<4
+        fullhdwebdl  |      | 1<<6
+    """
+
+    def test(self):
+        return self.checkDBVersion() >= 11 # set so we will skip for now, needs work
+
+    def _update_quality(self, old_quality):
+        mask = (common.Quality.HDWEBDL - 1)
+        unknown = old_quality & common.Quality.UNKNOWN
+        known = old_quality & ~common.Quality.UNKNOWN
+        return unknown + ((known & ~mask) << 1) + (known & mask)
+
+    def _update_status(self, old_status):
+        (status, quality) = common.Quality.splitCompositeStatus(old_status)
+        if quality == common.Quality.HDWEBDL:
+            quality = quality >> 2
+        elif quality == common.Quality.HDBLURAY:
+            quality = quality >> 3
+        elif quality == common.Quality.FULLHDBLURAY:
+            quality = quality >> 3
+        return common.Quality.compositeStatus(status, quality)
+
+    def execute(self):
+        # sickbeard.QUALITY_DEFAULT = self._update_quality(sickbeard.QUALITY_DEFAULT)
+
+        sickbeard.save_config()
+
+        old_hd = common.Quality.combineQualities([common.Quality.HDTV, common.Quality.HDWEBDL >> 2, common.Quality.HDBLURAY >> 3], [])
+        new_hd = common.Quality.combineQualities([common.Quality.HDTV, common.Quality.HDWEBDL, common.Quality.HDBLURAY], [])
+
+        # shift existing qualities and add new 1080p qualities, note that rawHD was not added to the ANY template
+        old_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.HDWEBDL >> 2, common.Quality.HDBLURAY >> 3, common.Quality.UNKNOWN], [])
+        new_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.FULLHDTV, common.Quality.HDWEBDL, common.Quality.FULLHDWEBDL, common.Quality.HDBLURAY, common.Quality.FULLHDBLURAY, common.Quality.UNKNOWN], [])
+
+        shows = self.connection.select("SELECT * FROM tv_shows")
+        for cur_show in shows:
+            if cur_show["quality"] == old_hd:
+                new_quality = new_hd
+            elif cur_show["quality"] == old_any:
+                new_quality = new_any
+            else:
+                new_quality = self._update_quality(cur_show["quality"])
+            self.connection.action("UPDATE tv_shows SET quality = ? WHERE tvdb_id = ?", [new_quality, cur_show["tvdb_id"]])
+
+        episodes = self.connection.select("SELECT * FROM tv_episodes")
+
+        for cur_episode in episodes:
+            self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [self._update_status(cur_episode["status"]), cur_episode["episode_id"]])
+
+        self.incDBVersion()
