@@ -245,22 +245,25 @@ class NewzbinProvider(generic.NZBProvider):
             logger.log("Unable to get an ID from " + str(nzb.url) + ", can't download from Newzbin's API", logger.ERROR)
             return False
 
-        logger.log("Downloading an NZB from newzbin with id " + nzbid)
+        logger.log("Downloading an NZB from newzbin with id " + nzbid + " with quality " + Quality.qualityStrings[nzb.quality])
 
         fileName = ek.ek(os.path.join, sickbeard.NZB_DIR, helpers.sanitizeFileName(nzb.name) + '.nzb')
 
         urllib._urlopener = NewzbinDownloader()
-
         params = urllib.urlencode({"username": sickbeard.NEWZBIN_USERNAME, "password": sickbeard.NEWZBIN_PASSWORD, "reportid": nzbid})
         try:
             urllib.urlretrieve(self.url + "api/dnzb/", fileName, data=params)
-            logger.log("Saving NZB: " + fileName)
+        except exceptions.AuthException, e:
+            logger.log("Error downloading NZB: " + ex(e), logger.ERROR)
+            return False
         except exceptions.NewzbinAPIThrottled:
             logger.log("Done waiting for Newzbin API throttle limit, starting downloads again")
             self.downloadResult(nzb)
         except (urllib.ContentTooShortError, IOError), e:
             logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return False
+
+        logger.log("Saving to " + fileName)
 
         return True
 
