@@ -50,12 +50,14 @@ class NewzbinDownloader(urllib.FancyURLopener):
             if newzbinErrCode == 450:
                 rtext = str(headers.getheader('X-DNZB-RText'))
                 result = re.search("wait (\d+) seconds", rtext)
-
             elif newzbinErrCode == 401:
                 raise exceptions.AuthException("Newzbin username or password incorrect")
-
             elif newzbinErrCode == 402:
                 raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
+            elif newzbinErrCode == 400 or 404:
+                raise exceptions.FileNotFoundException("The requested NZB ID was not found on Newzbin")
+            elif newzbinErrCode == 500 or 503:
+                raise exceptions.LaterException("Newzbin server appears to be having a problem, try again later")
 
             logger.log("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
 
