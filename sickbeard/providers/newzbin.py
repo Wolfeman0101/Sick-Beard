@@ -393,8 +393,8 @@ class NewzbinCache(tvcache.TVCache):
 
     def __init__(self, provider):
         tvcache.TVCache.__init__(self, provider)
-        # only poll Newzbin every 10 mins max
-        self.minTime = 1
+        # only poll Newzbin every 15 mins max
+        self.minTime = 15
 
     def _getRSSData(self):
         data = self.provider._getRSSData()
