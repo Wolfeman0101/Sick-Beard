@@ -30,16 +30,13 @@ from sickbeard import classes, logger, show_name_helpers, helpers
 from sickbeard import tvcache
 from sickbeard.exceptions import ex
 
+
 class NZBMatrixProvider(generic.NZBProvider):
 
     def __init__(self):
-
         generic.NZBProvider.__init__(self, "NZBMatrix")
-
         self.supportsBacklog = True
-
         self.cache = NZBMatrixCache(self)
-
         self.url = 'http://www.nzbmatrix.com/'
 
     def isEnabled(self):
@@ -52,24 +49,20 @@ class NZBMatrixProvider(generic.NZBProvider):
         return [' '.join(sceneSearchStrings)]
 
     def _get_episode_search_strings(self, ep_obj):
-
         sceneSearchStrings = set(show_name_helpers.makeSceneSearchString(ep_obj))
 
         # search for all show names and episode numbers like ("a","b","c") in a single search
         return ['("' + '","'.join(sceneSearchStrings) + '")']
 
-    def _doSearch(self, curString, quotes=False, show=None):
-
-        term =  re.sub('[\.\-]', ' ', curString).encode('utf-8')
-        if quotes:
-            term = "\""+term+"\""
+    def _doSearch(self, curString, show=None):
+        term = re.sub('[\.\-]', ' ', curString).encode('utf-8')
 
         params = {"term": term,
                   "maxage": sickbeard.USENET_RETENTION,
                   "page": "download",
                   "username": sickbeard.NZBMATRIX_USERNAME,
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
-                  "subcat": "6,41",
+                  "subcat": "6,8,41",
                   "english": 1,
                   "ssl": 1,
                   "scenename": 1}
@@ -80,7 +73,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 
         # if the show is a documentary use those cats on nzbmatrix
         if show and show.genre and 'documentary' in show.genre.lower():
-            params['subcat'] = params['subcat'] + ',53,9' 
+            params['subcat'] = params['subcat'] + ',53,9'
 
         searchURL = "https://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 
@@ -98,7 +91,7 @@ class NZBMatrixProvider(generic.NZBProvider):
             parsedXML = parseString(searchResult)
             items = parsedXML.getElementsByTagName('item')
         except Exception, e:
-            logger.log(u"Error trying to load NZBMatrix RSS feed: "+ex(e), logger.ERROR)
+            logger.log(u"Error trying to load NZBMatrix RSS feed: " + ex(e), logger.ERROR)
             return []
 
         results = []
@@ -106,7 +99,7 @@ class NZBMatrixProvider(generic.NZBProvider):
         for curItem in items:
             (title, url) = self._get_title_and_url(curItem)
 
-            if title == 'Error: No Results Found For Your Search':
+            if title == 'Error: No results found for the search':
                 continue
 
             if not title or not url:
@@ -117,9 +110,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 
         return results
 
-
     def findPropers(self, date=None):
-
         results = []
 
         for curResult in self._doSearch("(PROPER,REPACK)"):
@@ -131,7 +122,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 
             dateStr = re.search('<b>Added:</b> (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)', descriptionStr).group(1)
             if not dateStr:
-                logger.log(u"Unable to figure out the date for entry "+title+", skipping it")
+                logger.log(u"Unable to figure out the date for entry " + title + ", skipping it")
                 continue
             else:
                 resultDate = datetime.datetime.strptime(dateStr, "%Y-%m-%d %H:%M:%S")
@@ -145,12 +136,9 @@ class NZBMatrixProvider(generic.NZBProvider):
 class NZBMatrixCache(tvcache.TVCache):
 
     def __init__(self, provider):
-
         tvcache.TVCache.__init__(self, provider)
-
         # only poll NZBMatrix every 25 minutes max
         self.minTime = 25
-
 
     def _getRSSData(self):
         # get all records since the last timestamp
@@ -163,7 +151,7 @@ class NZBMatrixCache(tvcache.TVCache):
                    'english': 1,
                    'ssl': 1,
                    'scenename': 1,
-                   'subcat': '6,41'}
+                   'subcat': '6,8,41'}
 
         # don't allow it to be missing
         if not urlArgs['maxage']:
@@ -171,7 +159,7 @@ class NZBMatrixCache(tvcache.TVCache):
 
         url += urllib.urlencode(urlArgs)
 
-        logger.log(u"NZBMatrix cache update URL: "+ url, logger.DEBUG)
+        logger.log(u"NZBMatrix cache update URL: " + url, logger.DEBUG)
 
         data = self.provider.getURL(url)
 
