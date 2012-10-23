@@ -35,7 +35,6 @@ $(document).ready(function () {
         }
 
         $('#searchResults').html('<img id="searchingAnim" src="' + sbRoot + '/images/loading32.gif" height="32" width="32" /> searching...');
-        myform.loadsection(0);
 
         $.getJSON(sbRoot + '/home/addShows/searchTVDBForShowName', {'name': $('#nameToSearch').val(), 'lang': $('#tvdbLangSelect').val()}, function (data) {
             var firstResult = true;
